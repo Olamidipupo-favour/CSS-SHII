@@ -1,41 +1,256 @@
 :root {
-    /* Inherit/Match Carousel Palette where possible */
+    /* Colors */
+    --color-bg-body: #F4F6F8;
     --color-navy: #102A56;
     --color-cyan: #00F0FF;
     --color-white: #FFFFFF;
+    --color-border: rgba(0, 0, 0, 0.08);
     --color-text-muted: #B0B8C4;
     --color-bg-light: #F9FAFB;
     --color-border-subtle: #E5E7EB;
 
+    /* Typography */
     --font-family: 'Inter', sans-serif;
+
+    /* Dimensions & Radius */
+    --card-width: 300px;
+    --card-height: 420px;
+    --card-radius: 32px;
     --radius-pill: 9999px;
     --radius-card: 16px;
+    --gap: 32px;
+
+    /* Animation */
+    --scroll-speed: 40s;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body {
-    font-family: var(--font-family);
     margin: 0;
+    padding: 0;
     background-color: var(--color-bg-light);
+    font-family: var(--font-family);
     color: #1F2937;
 }
 
+/* Specific body style for carousel demo centering */
+body.carousel-demo {
+    background-color: var(--color-bg-body);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
 /* =========================================
-   FAQ Section
+   CAROUSEL COMPONENT
    ========================================= */
+
+/* Marquee Container */
+.marquee-wrapper {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    padding: 60px 0;
+    /* Space for hover expansion */
+
+    /* Vignette / Fade edges */
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-track {
+    display: flex;
+    gap: var(--gap);
+    width: max-content;
+
+    /* Infinite Scroll Animation - paused by default */
+    animation: scroll var(--scroll-speed) linear infinite;
+    animation-play-state: paused;
+
+    /* Ensure interaction doesn't break layout */
+    transform-style: preserve-3d;
+}
+
+/* Enable auto-scroll when data-autoscroll="true" */
+.marquee-wrapper[data-autoscroll="true"] .marquee-track {
+    animation-play-state: running;
+}
+
+/* Pause on Hover (only if auto-scroll is enabled) */
+.marquee-wrapper[data-autoscroll="true"]:hover .marquee-track {
+    animation-play-state: paused;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Card Styling */
+.card {
+    position: relative;
+    flex: 0 0 var(--card-width);
+    height: var(--card-height);
+    border-radius: var(--card-radius);
+    background-color: var(--color-white);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+
+    /* Transitions for "Push" Effect */
+    transition:
+        flex-basis 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+        transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+        box-shadow 0.4s ease;
+
+    cursor: default;
+}
+
+/* Branding Banner (Navy + Grid) */
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20%;
+    /* Vertical Banner Strip */
+    height: 100%;
+    background-color: var(--color-navy);
+
+    /* Cyan Grid Pattern */
+    background-image:
+        linear-gradient(var(--color-cyan) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-cyan) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: center;
+    opacity: 0.15;
+    z-index: 1;
+}
+
+/* Content Area (Placeholder for Video/Person) */
+.card-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+    z-index: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Play Icon */
+.play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 64px;
+    height: 64px;
+    background: rgba(16, 42, 86, 0.25);
+    /* More translucent as requested */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    /* Stronger blur for glass effect */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 10;
+    cursor: pointer;
+}
+
+.play-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--color-white);
+    margin-left: 4px;
+    /* Optical center */
+    opacity: 0.9;
+}
+
+/* Real Image Styling */
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Hover Interactions */
+.card:hover {
+    /* Enhanced "Push" expansion */
+    flex-basis: 450px;
+    transform: scale(1.05);
+    z-index: 20;
+    box-shadow: 0 40px 80px rgba(16, 42, 86, 0.25);
+    border-color: var(--color-cyan);
+}
+
+/* Stronger push-away effect for neighboring cards */
+.marquee-track:hover .card:not(:hover) {
+    opacity: 0.4;
+    transform: scale(0.92);
+}
+
+.card:hover .play-icon {
+    transform: translate(-50%, -50%) scale(1.3);
+    background-color: var(--color-cyan);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+}
+
+/* "DropCourse" Logo Placeholder (Vertical Text on Banner) */
+.logo-text {
+    position: absolute;
+    left: 12px;
+    bottom: 24px;
+    transform: rotate(-90deg);
+    transform-origin: left bottom;
+    color: var(--color-white);
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-size: 0.8rem;
+    z-index: 5;
+    opacity: 0.9;
+    text-transform: uppercase;
+}
+
+/* =========================================
+   FAQ / FOOTER / CTA SECTIONS
+   ========================================= */
+
+/* Main content wrapper - scrolls normally */
+.main-content-wrapper {
+    position: relative;
+    z-index: 2;
+    background: var(--color-bg-light);
+    padding-bottom: 150vh;
+}
+
 .faq-section {
     max-width: 800px;
     margin: 80px auto 0;
-    padding: 0 24px 200px;
+    padding: 0 24px;
     background-color: var(--color-bg-light);
     position: relative;
-    z-index: 2;
 }
 
-/* Footer Reveal Container - Normal flow */
+/* Footer container - normal flow */
 .footer-reveal-container {
     position: relative;
-    z-index: 1;
-    background-color: var(--color-bg-light);
 }
 
 .faq-header {
@@ -152,11 +367,13 @@ body {
 }
 
 /* =========================================
-   CTA Section (Grid Motif)
+   CTA Section (Grid Motif) - DRAWER REVEAL
    ========================================= */
 .footer-cta {
     background: linear-gradient(135deg, #0D3B7A 0%, #2563EB 100%);
-    position: relative;
+    position: sticky;
+    bottom: 0;
+    z-index: -1;
     overflow: hidden;
     padding: 80px 40px;
     text-align: center;
@@ -437,12 +654,12 @@ body {
 @keyframes slideOut {
     from {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 
     to {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(40px) scale(0.9);
     }
 }
 
